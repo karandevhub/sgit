@@ -59,9 +59,13 @@ try {
     $CurrentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
     if ($CurrentPath -notlike "*$InstallDir*") {
         [Environment]::SetEnvironmentVariable("PATH", "$InstallDir;$CurrentPath", "User")
-        Write-Info "Added $InstallDir to your PATH (restart your terminal to apply)"
+        Write-Info "Added $InstallDir to your PATH"
     }
-
+    
+    # Make it available in the current session
+    if ($env:PATH -notlike "*$InstallDir*") {
+        $env:PATH = "$InstallDir;$env:PATH"
+    }
     Write-Host ""
     Write-Host "  v  sgit v$Version installed!" -ForegroundColor Green
     Write-Host ""
