@@ -27,7 +27,7 @@ sgit log "recent work on the payment gateway" --author alice
 | Works on any git repo | ✓ | ✓ |
 | Speed on 10 000 commits | instant | ~20 ms |
 
-It runs a local **[ALL-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)** embedding model (~80 MB, downloaded once) and stores all embeddings in a single SQLite file. No cloud, no API keys, no daemons.
+It runs a local **[ALL-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)** embedding model and stores all embeddings in a single SQLite file. No cloud, no API keys, no daemons.
 
 ---
 
@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | 
 Install a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- 0.2.0
+curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- 0.1.1
 ```
 
 ### Windows (PowerShell)

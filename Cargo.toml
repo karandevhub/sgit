@@ -6,12 +6,12 @@ members = [
 ]
 
 [workspace.package]
-version       = "0.1.0"
+version       = "0.1.1"
 edition       = "2021"
 rust-version  = "1.80"
 license       = "MIT"
 repository    = "https://github.com/karandevhub/sgit"
-authors       = ["Your Name <you@example.com>"]
+authors       = ["Karan Kumar karanmahatocse@gmail.com"]
 
 # ── All dependencies declared once here. ──────────────────────────────────────
 # Each crate inherits with `dep.workspace = true` — no version duplication.
