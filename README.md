@@ -6,10 +6,12 @@
 
 > **Find commits with natural language instead of grep patterns.**
 
-```
-sgit log "authentication bug fixed"
-sgit log "database migration schema change" -n 5
-sgit log "stripe payment refactor" --author alice --after 2024-01-01
+```bash
+# Search by meaning, not just keywords
+sgit log "where did we fix the login timeout issue?"
+sgit log "show me changes related to database performance" -n 5
+sgit log "how are we handling user permissions and security"
+sgit log "recent work on the payment gateway" --author alice
 ```
 
 ---
@@ -69,9 +71,9 @@ cd ~/your-project
 sgit index
 
 # 3. Search!
-sgit log "when did we change the password hashing"
-sgit log "redis cache invalidation bug"
-sgit log "stripe webhook fix" --author bob --after 2024-03-01 -n 5
+sgit log "when did the login system change?"
+sgit log "I need to find where we improved the speed of the API"
+sgit log "recent work on billing and money" --author bob -n 5
 ```
 
 The index is incremental — re-run `sgit index` after adding new commits or install the auto-hook:
