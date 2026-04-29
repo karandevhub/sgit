@@ -163,19 +163,19 @@ FINAL_PATH="${INSTALL_DIR:+$INSTALL_DIR/}$BINARY_NAME"
 
 # ── Auto-fix PATH ─────────────────────────────────────────────────────────────
 if [ -n "$INSTALL_DIR" ] && ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-    # Detect which shell profile to update
+    # Detect shell profile purely from $SHELL (always set, no unbound variable risk)
     SHELL_PROFILE=""
-    if [ -n "${ZSH_VERSION:-}" ] || [ "$(basename "$SHELL")" = "zsh" ]; then
-        SHELL_PROFILE="$HOME/.zshrc"
-    elif [ -n "${BASH_VERSION:-}" ] || [ "$(basename "$SHELL")" = "bash" ]; then
-        if [ -f "$HOME/.bash_profile" ]; then
-            SHELL_PROFILE="$HOME/.bash_profile"
-        else
-            SHELL_PROFILE="$HOME/.bashrc"
-        fi
-    else
-        SHELL_PROFILE="$HOME/.profile"
-    fi
+    case "$(basename "${SHELL:-sh}")" in
+        zsh)  SHELL_PROFILE="$HOME/.zshrc" ;;
+        bash)
+            if [ -f "$HOME/.bash_profile" ]; then
+                SHELL_PROFILE="$HOME/.bash_profile"
+            else
+                SHELL_PROFILE="$HOME/.bashrc"
+            fi
+            ;;
+        *)    SHELL_PROFILE="$HOME/.profile" ;;
+    esac
 
     PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
 
