@@ -142,20 +142,23 @@ chmod +x "$BINARY_PATH"
 
 # ── Install ───────────────────────────────────────────────────────────────────
 # Try common directories that are already in PATH — no sourcing needed.
-# Priority: /opt/homebrew/bin (ARM Mac) → /usr/local/bin → ~/.local/bin
+# Priority: /opt/homebrew/bin (ARM Mac) → /usr/local/bin (with or without sudo) → ~/.local/bin
 INSTALL_DIR=""
 
 if [ -w "/opt/homebrew/bin" ]; then
     INSTALL_DIR="/opt/homebrew/bin"
 elif [ -w "/usr/local/bin" ]; then
     INSTALL_DIR="/usr/local/bin"
+elif command -v sudo >/dev/null 2>&1; then
+    # Try using sudo to install globally
+    INSTALL_DIR="/usr/local/bin"
+    info "Requesting sudo to install to $INSTALL_DIR (so it works without restarting terminal)"
+    sudo mv "$BINARY_PATH" "$INSTALL_DIR/$BINARY_NAME"
+    INSTALL_DIR=""  # mark as done
 elif mkdir -p "$HOME/.local/bin" 2>/dev/null; then
     INSTALL_DIR="$HOME/.local/bin"
 else
-    INSTALL_DIR="/usr/local/bin"
-    info "Need sudo to install to $INSTALL_DIR"
-    sudo mv "$BINARY_PATH" "$INSTALL_DIR/$BINARY_NAME"
-    INSTALL_DIR=""  # mark as done
+    die "Could not find a suitable installation directory."
 fi
 
 if [ -n "$INSTALL_DIR" ]; then
