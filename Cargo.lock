@@ -2485,7 +2485,7 @@ dependencies = [
 
 [[package]]
 name = "sgit"
-version = "0.1.9"
+version = "0.1.11"
 dependencies = [
  "anyhow",
  "clap",
@@ -2505,7 +2505,7 @@ dependencies = [
 
 [[package]]
 name = "sgit-core"
-version = "0.1.9"
+version = "0.1.11"
 dependencies = [
  "async-trait",
  "chrono",

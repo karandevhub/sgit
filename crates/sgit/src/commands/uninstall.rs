@@ -14,10 +14,11 @@ pub async fn run() -> Result<()> {
     let data_dir = proj_dirs.data_dir();
     if data_dir.exists() {
         print!("  {} Removing data directory ({})... ", "→".cyan(), data_dir.display());
-        match std::fs::remove_dir_all(data_dir) {
-            Ok(_) => println!("{}", "Done".green()),
-            Err(e) => println!("{} ({})", "Failed".red(), e),
-        }
+        std::fs::remove_dir_all(data_dir).map_err(|e| {
+            println!("{}", "Failed".red());
+            e
+        }).context("Failed to remove data directory")?;
+        println!("{}", "Done".green());
     } else {
         println!("  {} Data directory not found, skipping.", "→".cyan());
     }
@@ -43,7 +44,18 @@ pub async fn run() -> Result<()> {
     print!("  {} Deleting sgit binary... ", "→".cyan());
     match self_replace::self_delete() {
         Ok(_) => println!("{}", "Done".green()),
-        Err(e) => println!("{} ({})", "Failed".red(), e),
+        Err(e) => {
+            println!("{} ({})", "Failed".red(), e);
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                println!(
+                    "\n  {} Permission denied. Please run with sudo:\n     {} {} uninstall",
+                    "✗".red(),
+                    "sudo".yellow(),
+                    "sgit".cyan()
+                );
+            }
+            return Ok(()); // Stop here if binary deletion fails
+        }
     }
 
     println!("\n  {} sgit has been successfully uninstalled.\n", "✓".green().bold());
