@@ -2,9 +2,9 @@
 # sgit installer — https://github.com/karandevhub/sgit
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/master/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/master/install.sh | bash -s -- 0.2.0
-#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/master/install.sh | bash -s -- latest
+#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- 0.2.0
+#   curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- latest
 
 set -euo pipefail
 
@@ -63,7 +63,7 @@ case "$(uname -s)" in
         # Windows — try the PowerShell installer instead
         warn "Detected Windows. Running PowerShell installer..."
         powershell -NoProfile -ExecutionPolicy Bypass \
-            -Command "iex (irm 'https://raw.githubusercontent.com/$REPO/master/install.ps1')"
+            -Command "iex (irm 'https://raw.githubusercontent.com/$REPO/main/install.ps1')"
         exit 0
         ;;
     *) die "Unsupported OS: $(uname -s)" ;;

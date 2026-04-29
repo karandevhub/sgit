@@ -1,5 +1,5 @@
 # Install sgit on Windows via PowerShell
-# Run: iwr -useb https://raw.githubusercontent.com/karandevhub/sgit/master/install.ps1 | iex
+# Run: iwr -useb https://raw.githubusercontent.com/karandevhub/sgit/main/install.ps1 | iex
 
 param([string]$Version = "latest")
 
