@@ -141,13 +141,15 @@ BINARY_PATH="$DOWNLOAD_DIR/$BINARY_NAME"
 chmod +x "$BINARY_PATH"
 
 # ── Install ───────────────────────────────────────────────────────────────────
-# Prefer /usr/local/bin — it's already in PATH on all Macs and most Linux systems.
-# Fall back to ~/.local/bin if /usr/local/bin isn't writable.
+# Try common directories that are already in PATH — no sourcing needed.
+# Priority: /opt/homebrew/bin (ARM Mac) → /usr/local/bin → ~/.local/bin
 INSTALL_DIR=""
 
-if [ -w "/usr/local/bin" ]; then
+if [ -w "/opt/homebrew/bin" ]; then
+    INSTALL_DIR="/opt/homebrew/bin"
+elif [ -w "/usr/local/bin" ]; then
     INSTALL_DIR="/usr/local/bin"
-elif [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin" 2>/dev/null; then
+elif mkdir -p "$HOME/.local/bin" 2>/dev/null; then
     INSTALL_DIR="$HOME/.local/bin"
 else
     INSTALL_DIR="/usr/local/bin"
