@@ -161,14 +161,34 @@ fi
 
 FINAL_PATH="${INSTALL_DIR:+$INSTALL_DIR/}$BINARY_NAME"
 
-# ── PATH hint ─────────────────────────────────────────────────────────────────
+# ── Auto-fix PATH ─────────────────────────────────────────────────────────────
 if [ -n "$INSTALL_DIR" ] && ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-    warn "$INSTALL_DIR is not in your PATH."
-    echo ""
-    echo "  Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
-    echo ""
-    printf "  ${BOLD}export PATH=\"\$HOME/.local/bin:\$PATH\"${RESET}\n"
-    echo ""
+    # Detect which shell profile to update
+    SHELL_PROFILE=""
+    if [ -n "$ZSH_VERSION" ] || [ "$(basename "$SHELL")" = "zsh" ]; then
+        SHELL_PROFILE="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ] || [ "$(basename "$SHELL")" = "bash" ]; then
+        if [ -f "$HOME/.bash_profile" ]; then
+            SHELL_PROFILE="$HOME/.bash_profile"
+        else
+            SHELL_PROFILE="$HOME/.bashrc"
+        fi
+    else
+        SHELL_PROFILE="$HOME/.profile"
+    fi
+
+    PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
+
+    # Only add if it's not already in the file
+    if ! grep -qF "$PATH_LINE" "$SHELL_PROFILE" 2>/dev/null; then
+        echo "" >> "$SHELL_PROFILE"
+        echo "# Added by sgit installer" >> "$SHELL_PROFILE"
+        echo "$PATH_LINE" >> "$SHELL_PROFILE"
+        ok "Added $INSTALL_DIR to PATH in $SHELL_PROFILE"
+    fi
+
+    # Apply to current session so sgit works immediately
+    export PATH="$INSTALL_DIR:$PATH"
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
