@@ -165,9 +165,9 @@ FINAL_PATH="${INSTALL_DIR:+$INSTALL_DIR/}$BINARY_NAME"
 if [ -n "$INSTALL_DIR" ] && ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     # Detect which shell profile to update
     SHELL_PROFILE=""
-    if [ -n "$ZSH_VERSION" ] || [ "$(basename "$SHELL")" = "zsh" ]; then
+    if [ -n "${ZSH_VERSION:-}" ] || [ "$(basename "$SHELL")" = "zsh" ]; then
         SHELL_PROFILE="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ] || [ "$(basename "$SHELL")" = "bash" ]; then
+    elif [ -n "${BASH_VERSION:-}" ] || [ "$(basename "$SHELL")" = "bash" ]; then
         if [ -f "$HOME/.bash_profile" ]; then
             SHELL_PROFILE="$HOME/.bash_profile"
         else
