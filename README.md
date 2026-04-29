@@ -1,5 +1,9 @@
 # sgit — Semantic Git History Search
 
+[![GitHub downloads](https://img.shields.io/github/downloads/karandevhub/sgit/total?style=for-the-badge&color=cyan)](https://github.com/karandevhub/sgit/releases)
+[![GitHub release](https://img.shields.io/github/v/release/karandevhub/sgit?style=for-the-badge&color=green)](https://github.com/karandevhub/sgit/releases)
+[![License](https://img.shields.io/github/license/karandevhub/sgit?style=for-the-badge&color=blue)](LICENSE)
+
 > **Find commits with natural language instead of grep patterns.**
 
 ```
