@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             binary_name: sgit
             asset_name: sgit-linux-x86_64.tar.gz
