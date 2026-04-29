@@ -41,6 +41,9 @@ async fn main() -> anyhow::Result<()> {
         Commands::Update => {
             commands::update::run().await?;
         }
+        Commands::Uninstall => {
+            commands::uninstall::run().await?;
+        }
     }
 
     Ok(())

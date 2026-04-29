@@ -104,4 +104,7 @@ pub enum Commands {
 
     /// Check for and apply updates to sgit.
     Update,
+
+    /// Completely uninstall sgit, removing the binary, data, and cache.
+    Uninstall,
 }

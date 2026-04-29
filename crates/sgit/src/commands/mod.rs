@@ -1,5 +1,6 @@
 pub mod index;
 pub mod log;
+pub mod uninstall;
 
 pub mod status {
     use anyhow::Result;

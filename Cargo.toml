@@ -67,6 +67,7 @@ indicatif     = { version = "0.17", features = ["rayon"] }
 
 # self-update — implements `sgit update`
 self_update   = { version = "0.39", features = ["archive-tar", "compression-flate2"] }
+self-replace  = "1.5"
 
 # internal crate
 sgit-core     = { path = "crates/sgit-core" }

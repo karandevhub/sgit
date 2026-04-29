@@ -53,7 +53,7 @@ cd sgit
 cargo install --path crates/sgit
 ```
 
----
+
 
 ## Quick start
 
@@ -92,6 +92,7 @@ sgit hook   # installs a post-commit hook so the index updates automatically
 | `sgit status` | Show index stats |
 | `sgit hook` | Install post-commit auto-index hook |
 | `sgit update` | Update sgit to the latest release |
+| `sgit uninstall` | Safely remove the app, index, and git hook |
 
 ---
 
