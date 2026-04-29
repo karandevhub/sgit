@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | 
 Install a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- 0.1.1
+curl -fsSL https://raw.githubusercontent.com/karandevhub/sgit/main/install.sh | bash -s -- 0.1.2
 ```
 
 ### Windows (PowerShell)
