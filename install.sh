@@ -111,7 +111,7 @@ info "Version: v$VERSION"
 # ── Download & verify ─────────────────────────────────────────────────────────
 BASE_URL="$RELEASES_URL/download/v$VERSION"
 ARCHIVE_NAME="${BINARY_NAME}-${platform}.tar.gz"
-CHECKSUM_NAME="${BINARY_NAME}-${platform}.sha256"
+CHECKSUM_NAME="${ARCHIVE_NAME}.sha256"
 
 mkdir -p "$DOWNLOAD_DIR"
 trap 'rm -rf "$DOWNLOAD_DIR"' EXIT

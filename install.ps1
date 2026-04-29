@@ -30,7 +30,7 @@ Write-Info "Platform: $platform"
 
 $BaseUrl  = "https://github.com/$Repo/releases/download/v$Version"
 $ZipName  = "$Binary-$platform.zip"
-$SumName  = "$Binary-$platform.sha256"
+$SumName  = "$ZipName.sha256"
 $TmpDir   = Join-Path $env:TEMP "sgit-install-$(Get-Random)"
 New-Item -ItemType Directory -Path $TmpDir | Out-Null
 
