@@ -29,11 +29,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             binary_name: sgit
             asset_name: sgit-linux-x86_64.tar.gz
-            use_zig: true
           - os: macos-13 # Intel mac
             target: x86_64-apple-darwin
             binary_name: sgit
@@ -56,20 +55,19 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install zig and cargo-zigbuild
-        if: matrix.use_zig
-        run: |
-          pip install ziglang
-          cargo install cargo-zigbuild
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build binary
-        run: |
-          if [ "${{ matrix.use_zig }}" = "true" ]; then
-            cargo zigbuild --release -p sgit --target ${{ matrix.target }}.2.28
-          else
-            cargo build --release -p sgit --target ${{ matrix.target }}
-          fi
-        shell: bash
+        run: cargo build --release -p sgit --target ${{ matrix.target }}
 
       - name: Package Release (Linux/macOS)
         if: runner.os != 'Windows'
