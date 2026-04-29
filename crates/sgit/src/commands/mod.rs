@@ -101,14 +101,17 @@ pub mod update {
     pub async fn run() -> Result<()> {
         println!("\n  {} Checking for updates...\n", "→".cyan());
 
-        let status = self_update::backends::github::Update::configure()
-            .repo_owner("karandevhub")
-            .repo_name("sgit")
-            .bin_name("sgit")
-            .show_download_progress(true)
-            .current_version(env!("CARGO_PKG_VERSION"))
-            .build()?
-            .update()?;
+        let status = tokio::task::spawn_blocking(|| {
+            self_update::backends::github::Update::configure()
+                .repo_owner("karandevhub")
+                .repo_name("sgit")
+                .bin_name("sgit")
+                .show_download_progress(true)
+                .current_version(env!("CARGO_PKG_VERSION"))
+                .build()?
+                .update()
+        })
+        .await??;
 
         match status {
             self_update::Status::UpToDate(v) => {
