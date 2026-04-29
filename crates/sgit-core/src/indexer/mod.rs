@@ -1,12 +1,9 @@
-/// Indexer orchestrator: reads git history → embeds → saves to DB.
-///
-/// The key performance optimisation here (from studying smfs's approach):
-/// 1. Read ALL commits from git first (fast — pure memory reads)
-/// 2. Filter out already-indexed commits by checking SHAs in the DB
-/// 3. Embed in batches of 64 (fastembed handles internal parallelism)
-/// 4. Write to DB in a single transaction (much faster than per-row inserts)
-///
-/// This brings indexing a 5,000-commit repo from ~5min to ~20sec.
+// This is the "Orchestrator" of the indexing process. 
+// It coordinates three main steps:
+// 1. Reading your Git history to find all the commits.
+// 2. Using the AI model to "understand" (embed) those commits.
+// 3. Saving the results into our SQLite database.
+
 pub mod embed;
 pub mod git;
 
@@ -18,11 +15,11 @@ use crate::error::Result;
 use embed::load_shared_model;
 use git::read_commits;
 
-/// Options for the index command.
+/// Options that control how the indexer behaves.
 pub struct IndexOptions {
-    /// Path to the git repository to index (defaults to current directory)
+    /// Where the .git folder is located.
     pub repo_path: std::path::PathBuf,
-    /// If true, only index commits not already in the DB (incremental update)
+    /// If true, we only process new commits that aren't already in the database.
     pub incremental: bool,
 }
 
@@ -30,30 +27,28 @@ impl Default for IndexOptions {
     fn default() -> Self {
         Self {
             repo_path: std::env::current_dir().unwrap_or_else(|_| ".".into()),
-            incremental: true, // default to incremental — always safe
+            incremental: true, // Incremental is faster and usually what you want.
         }
     }
 }
 
-/// Statistics returned after indexing completes.
+/// Statistics about what happened during the indexing process.
 #[derive(Debug)]
 pub struct IndexStats {
-    pub total_commits: usize,
-    pub new_commits: usize,
-    pub skipped_commits: usize,
+    pub total_commits: usize,   // Total commits found in Git history
+    pub new_commits: usize,     // How many were actually new and indexed
+    pub skipped_commits: usize, // How many were already in our database
     pub db_path: std::path::PathBuf,
 }
 
-/// Run the full indexing pipeline.
-///
-/// Called from `sgit index`. Logs progress at every step using `tracing`
-/// so users can set RUST_LOG=debug to see detailed internals.
+/// The main function that runs the entire indexing pipeline.
+/// This is what gets called when you run 'sgit index'.
 pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
-    // Step 1: Open (or create) the database
+    // 1. Open the database.
     let store = Store::open()?;
     info!(db = %store.db_path().display(), "Database opened");
 
-    // Step 2: Read all commits from git history
+    // 2. Read all the commits from your Git history.
     info!("Reading git history...");
     let all_commits = read_commits(&opts.repo_path)?;
 
@@ -67,7 +62,7 @@ pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
         });
     }
 
-    // Step 3: Filter out commits already in the DB (incremental mode)
+    // 3. Filter out commits that we've already indexed before.
     let commits_to_index = if opts.incremental {
         let existing_shas = store.get_all_shas()?;
         let filtered: Vec<_> = all_commits
@@ -90,6 +85,7 @@ pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
 
     let skipped = all_commits.len() - commits_to_index.len();
 
+    // If there's nothing new to index, we can stop early!
     if commits_to_index.is_empty() {
         info!("Index is already up to date — nothing to do");
         return Ok(IndexStats {
@@ -100,11 +96,11 @@ pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
         });
     }
 
-    // Step 4: Load the embedding model
+    // 4. Load the AI embedding model.
     let model = load_shared_model()?;
 
-    // Step 5: Embed all new commits in batches
-    // Progress bar with commit count
+    // 5. Turn each new commit message into a mathematical vector (embedding).
+    // We show a nice progress bar while this is happening.
     let pb = ProgressBar::new(commits_to_index.len() as u64);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -113,7 +109,6 @@ pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
             .progress_chars("=>-"),
     );
 
-    // Extract just the messages for batch embedding
     let messages: Vec<String> = commits_to_index
         .iter()
         .map(|c| c.message.clone())
@@ -123,7 +118,7 @@ pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
     let embeddings = model.embed_batch(&messages)?;
     pb.finish_and_clear();
 
-    // Step 6: Write everything to DB in one transaction (much faster than row-by-row)
+    // 6. Save the results into the database.
     info!("Writing to database...");
     let mut records = Vec::with_capacity(commits_to_index.len());
     for (commit, embedding) in commits_to_index.iter().zip(embeddings.iter()) {

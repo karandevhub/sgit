@@ -1,10 +1,6 @@
-/// Handler for `sgit log` — the main user-facing command.
-///
-/// Flow:
-/// 1. Load the embedding model (fast after first load, uses LRU cache)
-/// 2. Embed the user's query
-/// 3. Score every commit by cosine similarity
-/// 4. Print results in a git-log-like format
+// This is the most important command: 'sgit log'. 
+// It allows users to search their Git history using natural language.
+
 use anyhow::Result;
 use colored::Colorize;
 use sgit_core::{
@@ -24,7 +20,8 @@ pub async fn run(
 ) -> Result<()> {
     debug!(query = %query, count, "Running log command");
 
-    // Load model — uses LRU cache for repeated calls in the same session
+    // 1. Load the AI model. 
+    // This model is what understands the meaning of your search query.
     let model = match load_shared_model() {
         Ok(m) => m,
         Err(SgitError::ModelLoad(e)) => {
@@ -41,6 +38,8 @@ pub async fn run(
         after_date: after.clone(),
     };
 
+    // 2. Perform the semantic search.
+    // It compares your query against every commit in the database.
     let results = match search(&query, &model, &opts) {
         Ok(r) => r,
         Err(SgitError::IndexNotFound) => {
@@ -71,16 +70,16 @@ pub async fn run(
         return Ok(());
     }
 
-    // Print header
+    // 3. Print the results in a format that looks like the regular 'git log'.
     println!(
         "\n{} {}\n",
         "Results for:".dimmed(),
         query.yellow().bold()
     );
 
-    // Print each result in a git-log-like format
     for result in &results {
         if show_scores {
+            // Show how confident the AI is about this result (0% to 100%).
             print!(
                 "  {} ",
                 format!("[{:.0}%]", result.score * 100.0).dimmed()
@@ -97,7 +96,7 @@ pub async fn run(
 
     println!();
 
-    // Show filter hints if filters were active
+    // 4. If the user used filters (like author or date), remind them what's active.
     if author.is_some() || after.is_some() {
         let mut active = vec![];
         if let Some(ref a) = author {

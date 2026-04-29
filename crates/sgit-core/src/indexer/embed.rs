@@ -1,10 +1,8 @@
-/// Local embedding model wrapper using fastembed 5.x.
-///
-/// Key facts about embeddings (important for understanding this code):
-/// - An embedding converts text → a list of ~384 numbers (a "vector")
-/// - Similar text produces vectors that are "close" to each other in space
-/// - The model is ~80MB, downloaded once, runs fully offline on CPU
-/// - fastembed's `embed()` is already batched — pass multiple texts at once
+// This module handles our local AI model.
+// An "embedding" is a way of turning text into a list of numbers (a vector).
+// If two pieces of text have similar meanings, their vectors will be "close" 
+// together in mathematical space. This is how semantic search works!
+
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 use lru::LruCache;
 use parking_lot::Mutex;
@@ -14,29 +12,29 @@ use tracing::{debug, info};
 
 use crate::error::{Result, SgitError};
 
-/// The embedding model we use. ALL-MiniLM-L6-v2:
-/// - 384 dimensions (each text becomes 384 numbers)
-/// - ~80MB download (once, then cached)
-/// - Excellent quality for semantic similarity on short texts
-/// - Runs in ~5ms per batch on a laptop CPU
+/// We use the "AllMiniLML6V2" model. 
+/// It's a small but powerful model (about 80MB) that runs entirely on your CPU.
 const MODEL: EmbeddingModel = EmbeddingModel::AllMiniLML6V2;
 
-/// How many texts to embed in one batch.
+/// How many messages we process at once. Batching makes the AI much faster.
 const BATCH_SIZE: usize = 64;
 
-/// Number of query embeddings to cache in memory.
+/// We cache the last 128 search queries so if you search for the same thing 
+/// twice, it's instant.
 const CACHE_SIZE: usize = 128;
 
-/// A loaded, ready-to-use embedding model with an LRU cache.
+/// This struct holds the actual AI model and a small cache for query results.
 pub struct EmbedModel {
-    /// fastembed 5.x requires &mut self for embed(), so wrap in Mutex for &self usage
+    // The AI model itself. We wrap it in a Mutex so multiple parts of the 
+    // app can use it safely.
     inner: Mutex<TextEmbedding>,
-    /// Cache: query text → embedding vector
+    // A cache that remembers the embeddings for the most recent search queries.
     cache: Mutex<LruCache<String, Vec<f32>>>,
 }
 
 impl EmbedModel {
-    /// Load the model from disk (or download it on first run).
+    /// Loads the model from your disk. 
+    /// If it's the first time running sgit, it will download the model files (~80MB).
     pub fn load() -> Result<Self> {
         info!("Loading embedding model (may download ~80MB on first run)");
 
@@ -53,8 +51,8 @@ impl EmbedModel {
         })
     }
 
-    /// Embed a single query string.
-    /// Checks the LRU cache first — if the query was seen recently, returns instantly.
+    /// Turns a search query into a list of numbers.
+    /// It checks the cache first to see if we've already computed it.
     pub fn embed_query(&self, query: &str) -> Result<Vec<f32>> {
         {
             let mut cache = self.cache.lock();
@@ -70,7 +68,7 @@ impl EmbedModel {
         Ok(embedding)
     }
 
-    /// Embed a single text string.
+    /// Helper to embed a single piece of text.
     fn embed_one(&self, text: &str) -> Result<Vec<f32>> {
         let results = self
             .inner
@@ -83,7 +81,8 @@ impl EmbedModel {
         })
     }
 
-    /// Embed a batch of texts. Much faster than one-by-one.
+    /// Processes a whole list of messages at once.
+    /// This is much faster than processing them one by one.
     pub fn embed_batch(&self, texts: &[String]) -> Result<Vec<Vec<f32>>> {
         if texts.is_empty() {
             return Ok(vec![]);
@@ -91,6 +90,7 @@ impl EmbedModel {
 
         let mut all_embeddings = Vec::with_capacity(texts.len());
 
+        // We split the list into small chunks (batches) to avoid using too much memory.
         for chunk in texts.chunks(BATCH_SIZE) {
             debug!(batch_size = chunk.len(), "Embedding batch");
 
@@ -112,10 +112,11 @@ impl EmbedModel {
     }
 }
 
-/// Shared, thread-safe handle to an EmbedModel.
+/// A thread-safe handle to our model that can be shared across the app.
 pub type SharedModel = Arc<EmbedModel>;
 
-/// Create a new shared model handle.
+/// Loads the model and wraps it in an Arc (Atomic Reference Counter) so 
+/// it can be safely used by multiple threads at the same time.
 pub fn load_shared_model() -> Result<SharedModel> {
     Ok(Arc::new(EmbedModel::load()?))
 }

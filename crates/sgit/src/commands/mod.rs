@@ -2,6 +2,7 @@ pub mod index;
 pub mod log;
 pub mod uninstall;
 
+// This module handles the 'sgit status' command.
 pub mod status {
     use anyhow::Result;
     use colored::Colorize;
@@ -26,6 +27,9 @@ pub mod status {
     }
 }
 
+// This module handles the 'sgit hook' command.
+// It installs a small script in .git/hooks/post-commit that triggers 
+// an index update every time you make a commit.
 pub mod hook {
     use anyhow::Result;
     use colored::Colorize;
@@ -36,6 +40,8 @@ pub mod hook {
             std::env::current_dir().expect("Cannot read current directory")
         });
         let hook_path = repo_path.join(".git/hooks/post-commit");
+        
+        // The script just runs 'sgit index' in the background.
         let hook_content = "#!/bin/sh\nsgit index 2>/dev/null &\n";
 
         if hook_path.exists() {
@@ -48,6 +54,8 @@ pub mod hook {
         }
 
         fs::write(&hook_path, hook_content)?;
+        
+        // On Linux/Mac, we need to make the script "executable".
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -64,6 +72,9 @@ pub mod hook {
     }
 }
 
+// This module handles the 'sgit install' command.
+// It copies the running binary into a standard folder (like ~/.local/bin)
+// so you can run 'sgit' from anywhere in your terminal.
 pub mod install {
     use anyhow::Result;
     use colored::Colorize;
@@ -82,6 +93,7 @@ pub mod install {
         Ok(())
     }
 
+    /// Determines the best place to install the binary on your system.
     fn dirs_install_path() -> std::path::PathBuf {
         // Try ~/.local/bin first (Linux/Mac user-level), fall back to /usr/local/bin
         if let Some(home) = std::env::var_os("HOME") {
@@ -95,6 +107,8 @@ pub mod install {
     }
 }
 
+// This module handles the 'sgit update' command.
+// It checks GitHub to see if there's a newer version of sgit available.
 pub mod update {
     use anyhow::Result;
     use colored::Colorize;

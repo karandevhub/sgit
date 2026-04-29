@@ -1,9 +1,11 @@
-/// All error types for sgit-core.
-///
-/// Using `thiserror` lets callers pattern-match on specific errors.
-/// `anyhow` is used in the CLI binary; `thiserror` is used in the library.
+// This module defines all the things that can go wrong in sgit.
+// By centralizing errors here, we can provide clear and helpful messages 
+// to the user when something doesn't work as expected.
+
 use thiserror::Error;
 
+/// The SgitError enum lists every possible error that can happen in the 
+/// core logic of sgit.
 #[derive(Debug, Error)]
 pub enum SgitError {
     // ── Setup errors ──────────────────────────────────────────────
@@ -35,7 +37,10 @@ pub enum SgitError {
     #[error("No commits match your query. Try broader terms.")]
     NoResults,
 
-    // ── Transparent wrappers so ? works on external types ─────────
+    // ── Wrapper errors ─────────────────────────────────────────────
+    // These allow sgit to automatically convert errors from other 
+    // libraries (like Git or SQLite) into our own SgitError format.
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
@@ -46,5 +51,5 @@ pub enum SgitError {
     Sqlite(#[from] rusqlite::Error),
 }
 
-/// Shorthand Result type used throughout sgit-core
+/// A convenient shorthand for Result<T, SgitError>.
 pub type Result<T> = std::result::Result<T, SgitError>;

@@ -1,9 +1,10 @@
-/// sgit-core — semantic git history search library.
-///
-/// This crate contains all the logic: git reading, embedding, DB, search.
-/// It has no CLI dependencies so it can be used as a library independently.
-///
-/// The binary crate (sgit) depends on this and adds the CLI shell.
+// This is the "Brain" of the sgit application. 
+// It contains all the complex logic for reading Git history, running 
+// the AI model, managing the database, and performing semantic searches.
+//
+// The reason this is a separate "crate" (library) is so that the logic 
+// can be re-used in different ways (like a GUI or a web server) without 
+// being tied to the command-line interface.
 
 pub mod config;
 pub mod db;
@@ -11,9 +12,8 @@ pub mod error;
 pub mod indexer;
 pub mod search;
 
-// Re-export the most commonly used types at the top level
-// so external callers can use `sgit_core::SearchResult` instead of
-// `sgit_core::search::query::SearchResult`
+// We "re-export" the most important parts of sgit-core here so that 
+// other crates (like our CLI binary) can access them easily.
 pub use error::{Result, SgitError};
 pub use indexer::{run as run_index, IndexOptions, IndexStats};
 pub use search::{search, SearchOptions, SearchResult};

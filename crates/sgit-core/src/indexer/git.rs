@@ -1,35 +1,28 @@
-/// Reads git commit history from the current directory using libgit2.
-///
-/// We use libgit2 (via the `git2` crate) instead of shelling out to `git`
-/// because: no process spawning overhead, works even if git isn't installed,
-/// and gives us structured access to commit objects.
+// This module is responsible for reading your Git history.
+// We use a library called 'libgit2' which allows us to read commits 
+// directly from the .git folder without needing the 'git' command installed.
+
 use chrono::{FixedOffset, TimeZone};
 use git2::{Repository, Sort};
 use tracing::{debug, info, warn};
 
 use crate::error::{Result, SgitError};
 
-/// A single commit record pulled from git history.
+/// This struct holds the basic information for a single commit.
 #[derive(Debug, Clone)]
 pub struct GitCommit {
-    /// Short 8-char SHA, e.g. "a1b2c3d4"
-    pub sha: String,
-    /// Full commit message (summary line only, not body)
-    pub message: String,
-    /// Author display name
-    pub author: String,
-    /// ISO 8601 date string, e.g. "2024-03-15"
-    pub date: String,
-    /// Unix timestamp — used for sorting
-    pub timestamp: i64,
+    pub sha: String,      // The short unique ID of the commit (e.g., "a1b2c3d4")
+    pub message: String,  // The text the developer wrote for this commit
+    pub author: String,   // Who wrote the commit
+    pub date: String,     // When it was written (formatted like YYYY-MM-DD)
+    pub timestamp: i64,   // The raw time number (used for sorting)
 }
 
-/// Walk the entire git history of the repo at `repo_path` and return all commits.
-///
-/// Commits with useless messages ("wip", "fix", ".", single words) are filtered out
-/// because they produce bad embeddings and pollute search results.
+/// Walks through your entire Git history and returns a list of all commits.
+/// We filter out "useless" messages like "wip" or "." because they don't 
+/// have enough meaning for the AI to understand them.
 pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
-    // Open the repository — looks for .git/ starting at repo_path
+    // Try to find the .git folder in the given path.
     let repo = Repository::discover(repo_path).map_err(|e| {
         SgitError::NoRepository(format!("{}: {}", repo_path.display(), e))
     })?;
@@ -38,7 +31,7 @@ pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
 
     let mut revwalk = repo.revwalk()?;
 
-    // Sort by time, newest first (matches `git log` default behaviour)
+    // We sort the commits by time, so the newest ones come first.
     revwalk.set_sorting(Sort::TIME | Sort::TOPOLOGICAL)?;
     revwalk.push_head()?;
 
@@ -49,7 +42,7 @@ pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
         let oid = oid_result?;
         let commit = repo.find_commit(oid)?;
 
-        // Get commit message — skip if missing or useless
+        // We only care about the first line of the commit message (the summary).
         let raw_message = match commit.summary() {
             Some(m) => m.to_string(),
             None => {
@@ -58,6 +51,7 @@ pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
             }
         };
 
+        // Skip messages that don't have enough information (like "fix" or "update").
         if is_useless_message(&raw_message) {
             debug!(sha = %oid, msg = %raw_message, "Skipping low-quality commit message");
             skipped += 1;
@@ -71,10 +65,11 @@ pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
             .to_string();
 
         let timestamp = commit.time().seconds();
+        // Convert the raw Git time into a nice human-readable string.
         let date = format_commit_date(timestamp, commit.time().offset_minutes());
 
         commits.push(GitCommit {
-            sha: oid.to_string()[..8].to_string(),
+            sha: oid.to_string()[..8].to_string(), // Just take the first 8 characters of the SHA.
             message: raw_message,
             author,
             date,
@@ -91,8 +86,7 @@ pub fn read_commits(repo_path: &std::path::Path) -> Result<Vec<GitCommit>> {
     Ok(commits)
 }
 
-/// Format a git commit timestamp into a human-readable date.
-/// Uses the commit's local timezone offset (same as `git log` shows).
+/// Helper function to turn a raw timestamp into a "YYYY-MM-DD" string.
 fn format_commit_date(unix_secs: i64, offset_minutes: i32) -> String {
     let offset = FixedOffset::east_opt(offset_minutes * 60)
         .unwrap_or_else(|| FixedOffset::east_opt(0).unwrap());
@@ -100,29 +94,28 @@ fn format_commit_date(unix_secs: i64, offset_minutes: i32) -> String {
     match offset.timestamp_opt(unix_secs, 0) {
         chrono::LocalResult::Single(dt) => dt.format("%Y-%m-%d").to_string(),
         _ => {
-            // Fallback if timestamp is out of range
             warn!(unix_secs, "Could not parse commit timestamp");
             "unknown".to_string()
         }
     }
 }
 
-/// Returns true for commit messages that are too short or generic to be useful.
-/// These produce low-quality embeddings that pollute search results.
+/// This function helps us avoid cluttering our search index with messages 
+/// that don't mean anything (like "...", "temp", or single words).
 fn is_useless_message(msg: &str) -> bool {
     let trimmed = msg.trim();
 
-    // Too short
+    // If it's shorter than 5 characters, it's probably not useful.
     if trimmed.len() < 5 {
         return true;
     }
 
-    // Only one word (e.g. "fix", "wip", "update", ".")
+    // If it's only one word, the AI won't have enough context to search it well.
     if trimmed.split_whitespace().count() < 2 {
         return true;
     }
 
-    // Common garbage commit messages
+    // A list of common "lazy" commit messages we want to ignore.
     let garbage = [
         "wip", "fix", "fixes", "update", "updates", ".", "..", "temp",
         "test", "testing", "misc", "stuff", "changes", "work in progress",
@@ -150,7 +143,6 @@ mod tests {
 
     #[test]
     fn test_format_date() {
-        // Unix timestamp 0 = 1970-01-01 UTC
         let date = format_commit_date(0, 0);
         assert_eq!(date, "1970-01-01");
     }
