@@ -59,8 +59,7 @@ jobs:
       - name: Install zig and cargo-zigbuild
         if: matrix.use_zig
         run: |
-          sudo apt-get update
-          sudo apt-get install -y zig
+          pip install ziglang
           cargo install cargo-zigbuild
 
       - name: Build binary
