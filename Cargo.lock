@@ -2665,6 +2665,7 @@ dependencies = [
  "directories",
  "indicatif 0.17.11",
  "reqwest 0.12.28",
+ "self-replace",
  "self_update",
  "serde",
  "serde_json",
