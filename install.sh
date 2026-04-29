@@ -141,27 +141,26 @@ BINARY_PATH="$DOWNLOAD_DIR/$BINARY_NAME"
 chmod +x "$BINARY_PATH"
 
 # ── Install ───────────────────────────────────────────────────────────────────
-# Try ~/.local/bin (no sudo), fall back to /usr/local/bin (may need sudo)
+# Prefer /usr/local/bin — it's already in PATH on all Macs and most Linux systems.
+# Fall back to ~/.local/bin if /usr/local/bin isn't writable.
 INSTALL_DIR=""
 
-if [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin" 2>/dev/null; then
-    INSTALL_DIR="$HOME/.local/bin"
-elif [ -w "/usr/local/bin" ]; then
+if [ -w "/usr/local/bin" ]; then
     INSTALL_DIR="/usr/local/bin"
+elif [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin" 2>/dev/null; then
+    INSTALL_DIR="$HOME/.local/bin"
 else
     INSTALL_DIR="/usr/local/bin"
     info "Need sudo to install to $INSTALL_DIR"
     sudo mv "$BINARY_PATH" "$INSTALL_DIR/$BINARY_NAME"
-    INSTALL_DIR=""   # mark as done
+    INSTALL_DIR=""  # mark as done
 fi
 
 if [ -n "$INSTALL_DIR" ]; then
     mv "$BINARY_PATH" "$INSTALL_DIR/$BINARY_NAME"
 fi
 
-FINAL_PATH="${INSTALL_DIR:+$INSTALL_DIR/}$BINARY_NAME"
-
-# ── Auto-fix PATH ─────────────────────────────────────────────────────────────
+# ── Auto-fix PATH (only needed if we installed to ~/.local/bin) ───────────────
 if [ -n "$INSTALL_DIR" ] && ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     # Detect shell profile purely from $SHELL (always set, no unbound variable risk)
     SHELL_PROFILE=""
@@ -179,16 +178,13 @@ if [ -n "$INSTALL_DIR" ] && ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
 
     PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
 
-    # Only add if it's not already in the file
     if ! grep -qF "$PATH_LINE" "$SHELL_PROFILE" 2>/dev/null; then
         echo "" >> "$SHELL_PROFILE"
         echo "# Added by sgit installer" >> "$SHELL_PROFILE"
         echo "$PATH_LINE" >> "$SHELL_PROFILE"
-        ok "Added $INSTALL_DIR to PATH in $SHELL_PROFILE"
     fi
 
-    # Apply to current session so sgit works immediately
-    export PATH="$INSTALL_DIR:$PATH"
+    warn "Run 'source $SHELL_PROFILE' or open a new terminal for sgit to be available."
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
