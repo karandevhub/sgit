@@ -116,11 +116,24 @@ pub mod update {
     pub async fn run() -> Result<()> {
         println!("\n  {} Checking for updates...\n", "→".cyan());
 
-        let status = tokio::task::spawn_blocking(|| {
+        let target = if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+            "darwin-aarch64"
+        } else if cfg!(target_os = "macos") && cfg!(target_arch = "x86_64") {
+            "darwin-x86_64"
+        } else if cfg!(target_os = "windows") && cfg!(target_arch = "x86_64") {
+            "windows-x86_64"
+        } else if cfg!(target_os = "linux") && cfg!(target_arch = "x86_64") {
+            "linux-x86_64"
+        } else {
+            self_update::get_target()
+        };
+
+        let status = tokio::task::spawn_blocking(move || {
             self_update::backends::github::Update::configure()
                 .repo_owner("karandevhub")
                 .repo_name("sgit")
                 .bin_name("sgit")
+                .target(target)
                 .show_download_progress(true)
                 .current_version(env!("CARGO_PKG_VERSION"))
                 .build()?
