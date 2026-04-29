@@ -1,6 +1,7 @@
 # sgit — Semantic Git History Search
 
 [![GitHub downloads](https://img.shields.io/github/downloads/karandevhub/sgit/total?style=for-the-badge&color=cyan)](https://github.com/karandevhub/sgit/releases)
+[![Installs](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Finstall&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=installs&style=for-the-badge)](https://github.com/karandevhub/sgit)
 [![GitHub release](https://img.shields.io/github/v/release/karandevhub/sgit?style=for-the-badge&color=green)](https://github.com/karandevhub/sgit/releases)
 [![License](https://img.shields.io/github/license/karandevhub/sgit?style=for-the-badge&color=blue)](LICENSE)
 
