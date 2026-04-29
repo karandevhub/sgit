@@ -32,19 +32,19 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             binary_name: sgit
-            asset_name: sgit-x86_64-unknown-linux-gnu.tar.gz
+            asset_name: sgit-linux-x86_64.tar.gz
           - os: macos-13 # Intel mac
             target: x86_64-apple-darwin
             binary_name: sgit
-            asset_name: sgit-x86_64-apple-darwin.tar.gz
+            asset_name: sgit-darwin-x86_64.tar.gz
           - os: macos-latest # M1/M2/M3 mac
             target: aarch64-apple-darwin
             binary_name: sgit
-            asset_name: sgit-aarch64-apple-darwin.tar.gz
+            asset_name: sgit-darwin-aarch64.tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             binary_name: sgit.exe
-            asset_name: sgit-x86_64-pc-windows-msvc.zip
+            asset_name: sgit-windows-x86_64.zip
 
     steps:
       - name: Checkout code
@@ -75,6 +75,7 @@ jobs:
           cd target/${{ matrix.target }}/release
           tar -czvf ../../../${{ matrix.asset_name }} ${{ matrix.binary_name }}
           cd ../../..
+          shasum -a 256 ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
 
       - name: Package Release (Windows)
         if: runner.os == 'Windows'
@@ -82,8 +83,11 @@ jobs:
           cd target\${{ matrix.target }}\release
           Compress-Archive -Path ${{ matrix.binary_name }} -DestinationPath ..\..\..\${{ matrix.asset_name }}
           cd ..\..\..
+          CertUtil -hashfile ${{ matrix.asset_name }} SHA256 | findstr /v "hash" > ${{ matrix.asset_name }}.sha256
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.asset_name }}
+          files: |
+            ${{ matrix.asset_name }}
+            ${{ matrix.asset_name }}.sha256
