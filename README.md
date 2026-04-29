@@ -95,35 +95,6 @@ sgit hook   # installs a post-commit hook so the index updates automatically
 
 ---
 
-## How it works
-
-```
-git log  ──►  filter useful commits  ──►  embed in batches (rayon + fastembed)
-                                               │
-                                          SQLite BLOB
-                                               │
-query  ──►  embed query  ──►  cosine similarity (rayon)  ──►  top-N results
-```
-
-1. **Reading** — uses [libgit2](https://libgit2.org/) (no `git` binary needed)
-2. **Embedding** — [fastembed-rs](https://github.com/Anush008/fastembed-rs) runs ALL-MiniLM offline on CPU (~5 ms/batch)
-3. **Storage** — SQLite with embeddings stored as raw `f32` BLOBs
-4. **Search** — cosine similarity scored in parallel across all CPU cores with [rayon](https://github.com/rayon-rs/rayon)
-
----
-
-## Data storage
-
-| OS | Location |
-|---|---|
-| macOS | `~/Library/Application Support/sgit/` |
-| Linux | `~/.local/share/sgit/` |
-| Windows | `%APPDATA%\sgit\` |
-
-The index is a single `index.db` file (~1.5 KB per commit). A 10 000-commit repo uses ~15 MB.
-
----
-
 ## Building from source
 
 ```bash
