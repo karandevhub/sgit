@@ -202,5 +202,5 @@ printf "    ${CYAN}sgit log \"auth bug\"${RESET}           # semantic search\n"
 printf "    ${CYAN}sgit log --help${RESET}               # all options\n"
 echo ""
 
-# Success tracking (only for total installs count)
-curl -s "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Finstall&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=installs&edge_flat=false" > /dev/null 2>&1
+# Download tracking — only reached on fully successful install
+curl -s "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Fdownload&count_bg=%230099CC&title_bg=%23555555&title=downloads&edge_flat=false" > /dev/null 2>&1 || true

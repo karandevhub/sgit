@@ -75,10 +75,11 @@ try {
     Write-Host "    sgit log --help        # all options"             -ForegroundColor Cyan
     Write-Host ""
 
-    # Success tracking
+    # Download tracking - only reached on fully successful install
     try {
-        $null = Invoke-WebRequest -Uri "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Finstall&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=installs&edge_flat=false" -UseBasicParsing -ErrorAction SilentlyContinue
+        $null = Invoke-WebRequest -Uri "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Fdownload&count_bg=%230099CC&title_bg=%23555555&title=downloads&edge_flat=false" -UseBasicParsing -ErrorAction SilentlyContinue
     } catch {}
+
 } finally {
     Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
 }
