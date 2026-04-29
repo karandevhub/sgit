@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version       = "0.1.6"
+version       = "0.1.8"
 edition       = "2021"
 rust-version  = "1.80"
 license       = "MIT"
@@ -55,18 +55,18 @@ directories   = "5"
 reqwest       = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
 
 # git reading — reads .git without calling the git binary
-git2          = "0.18"
+git2          = { version = "0.18", default-features = false }
 
 # local embedding model — runs ALL-MiniLM offline, no API key needed
 # ort-download-binaries-native-tls: bundles ONNX runtime + TLS so ort-sys builds anywhere
-fastembed     = { version = "5", default-features = false, features = ["ort-download-binaries-native-tls", "hf-hub-native-tls"] }
+fastembed     = { version = "5", default-features = false, features = ["ort-download-binaries-rustls-tls", "hf-hub-rustls-tls"] }
 
 # terminal output
 colored       = "2"
 indicatif     = { version = "0.17", features = ["rayon"] }
 
 # self-update — implements `sgit update`
-self_update   = { version = "0.39", features = ["archive-tar", "compression-flate2"] }
+self_update   = { version = "0.39", default-features = false, features = ["archive-tar", "compression-flate2", "rustls"] }
 self-replace  = "1.5"
 
 # internal crate
