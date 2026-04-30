@@ -45,7 +45,7 @@ pub struct IndexStats {
 /// This is what gets called when you run 'sgit index'.
 pub async fn run(opts: IndexOptions) -> Result<IndexStats> {
     // 1. Open the database.
-    let store = Store::open()?;
+    let store = Store::open(&opts.repo_path)?;
     info!(db = %store.db_path().display(), "Database opened");
 
     // 2. Read all the commits from your Git history.

@@ -39,8 +39,9 @@ pub async fn run(
     };
 
     // 2. Perform the semantic search.
-    // It compares your query against every commit in the database.
-    let results = match search(&query, &model, &opts) {
+    // It compares your query against every commit in the database for the current repo.
+    let repo_path = std::env::current_dir().expect("Cannot read current directory");
+    let results = match search(&query, &model, &opts, &repo_path) {
         Ok(r) => r,
         Err(SgitError::IndexNotFound) => {
             eprintln!(

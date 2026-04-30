@@ -29,9 +29,24 @@ pub fn data_dir() -> Result<PathBuf> {
     Ok(dir)
 }
 
-/// Returns the full path to the 'index.db' file (our SQLite database).
-pub fn db_path() -> Result<PathBuf> {
-    Ok(data_dir()?.join("index.db"))
+/// Returns the full path to the 'index.db' file for a specific repository.
+/// The database is stored inside the hidden '.git/sgit' folder so it follows 
+/// the project if it's moved, but is never tracked by Git.
+pub fn db_path(repo_path: &std::path::Path) -> Result<PathBuf> {
+    let repo = git2::Repository::discover(repo_path).map_err(|e| {
+        SgitError::NoRepository(format!("{}: {}", repo_path.display(), e))
+    })?;
+
+    let git_dir = repo.path(); // This is the path to the .git folder
+    let sgit_dir = git_dir.join("sgit");
+
+    // Create the .git/sgit folder if it doesn't exist
+    if !sgit_dir.exists() {
+        std::fs::create_dir_all(&sgit_dir)
+            .map_err(|e| SgitError::DataDirCreate(sgit_dir.display().to_string(), e.to_string()))?;
+    }
+
+    Ok(sgit_dir.join("index.db"))
 }
 
 /// Returns the folder where the AI model files will be downloaded.

@@ -30,10 +30,10 @@ pub struct Store {
 }
 
 impl Store {
-    /// Opens the database file located at the default path.
+    /// Opens the database file for a specific repository.
     /// If the file doesn't exist, it creates it and sets up the table.
-    pub fn open() -> Result<Self> {
-        let path = db_path()?;
+    pub fn open(repo_path: &Path) -> Result<Self> {
+        let path = db_path(repo_path)?;
         let conn = Connection::open(&path)?;
 
         // We create a table called 'commits' to store our data.

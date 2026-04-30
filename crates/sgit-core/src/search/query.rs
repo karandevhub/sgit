@@ -49,9 +49,10 @@ pub fn search(
     query: &str,
     model: &EmbedModel,
     opts: &SearchOptions,
+    repo_path: &std::path::Path,
 ) -> Result<Vec<SearchResult>> {
     // 1. Make sure we have an index (database) to search through.
-    let store = Store::open()?;
+    let store = Store::open(repo_path)?;
     let count = store.count()?;
 
     if count == 0 {

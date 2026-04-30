@@ -9,7 +9,8 @@ pub mod status {
     use sgit_core::db::Store;
 
     pub async fn run() -> Result<()> {
-        match Store::open() {
+        let repo_path = std::env::current_dir().expect("Cannot read current directory");
+        match Store::open(&repo_path) {
             Ok(store) => {
                 let count = store.count().unwrap_or(0);
                 println!("\n  {} {}", "Indexed commits:".dimmed(), count.to_string().bold());

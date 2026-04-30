@@ -39,7 +39,9 @@ impl EmbedModel {
         info!("Loading embedding model (may download ~80MB on first run)");
 
         let model = TextEmbedding::try_new(
-            InitOptions::new(MODEL).with_show_download_progress(true),
+            InitOptions::new(MODEL)
+                .with_show_download_progress(true)
+                .with_cache_dir(crate::config::model_cache_dir()?),
         )
         .map_err(|e| SgitError::ModelLoad(e.to_string()))?;
 
