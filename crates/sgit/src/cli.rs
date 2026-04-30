@@ -51,8 +51,8 @@ pub enum Commands {
         /// What are you looking for? (e.g., "fix payment bug")
         query: String,
 
-        /// How many results to show (default: 10).
-        #[arg(short = 'n', long, default_value = "10")]
+        /// How many results to show (default: 3).
+        #[arg(short = 'n', long, default_value = "3")]
         count: usize,
 
         /// Filter by who wrote the commit.

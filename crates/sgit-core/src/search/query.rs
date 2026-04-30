@@ -22,7 +22,7 @@ pub struct SearchResult {
 
 /// Options that control how the search behaves.
 pub struct SearchOptions {
-    /// Maximum number of results to show (default is 10).
+    /// Maximum number of results to show (default is 3).
     pub top_n: usize,
     /// Minimum similarity score to show. We hide results that are too irrelevant.
     pub min_score: f32,
@@ -35,7 +35,7 @@ pub struct SearchOptions {
 impl Default for SearchOptions {
     fn default() -> Self {
         Self {
-            top_n: 10,
+            top_n: 3,
             min_score: 0.15, // Hide anything with a score below 0.15.
             author_filter: None,
             after_date: None,
