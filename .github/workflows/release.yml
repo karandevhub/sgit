@@ -33,7 +33,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             binary_name: sgit
             asset_name: sgit-linux-x86_64.tar.gz
-          - os: macos-12 # Intel mac
+          - os: macos-13 # Intel mac
             target: x86_64-apple-darwin
             binary_name: sgit
             asset_name: sgit-darwin-x86_64.tar.gz
