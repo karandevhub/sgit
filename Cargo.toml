@@ -13,8 +13,7 @@ license       = "MIT"
 repository    = "https://github.com/karandevhub/sgit"
 authors       = ["Karan Kumar karanmahatocse@gmail.com"]
 
-# ── All dependencies declared once here. ──────────────────────────────────────
-# Each crate inherits with `dep.workspace = true` — no version duplication.
+
 [workspace.dependencies]
 
 # async runtime
@@ -48,31 +47,25 @@ rayon         = "1"
 rusqlite      = { version = "0.31", features = ["bundled"] }
 lru           = "0.12"
 
-# OS-native data/config paths
 directories   = "5"
 
-# HTTP — version check + future team sync
 reqwest       = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
 
-# git reading — reads .git without calling the git binary
 git2          = { version = "0.18", default-features = false }
 
-# local embedding model — runs ALL-MiniLM offline, no API key needed
-# ort-download-binaries-native-tls: bundles ONNX runtime + TLS so ort-sys builds anywhere
+
 fastembed     = { version = "5", default-features = false, features = ["ort-download-binaries-rustls-tls", "hf-hub-rustls-tls"] }
 
 # terminal output
 colored       = "2"
 indicatif     = { version = "0.17", features = ["rayon"] }
 
-# self-update — implements `sgit update`
 self_update   = { version = "0.39", default-features = false, features = ["archive-tar", "compression-flate2", "rustls"] }
 self-replace  = "1.5"
 
 # internal crate
 sgit-core     = { path = "crates/sgit-core" }
 
-# ── Release profile ───────────────────────────────────────────────────────────
 [profile.release]
 lto           = "thin"
 codegen-units = 1
