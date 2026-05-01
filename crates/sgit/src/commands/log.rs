@@ -1,5 +1,3 @@
-// This is the most important command: 'sgit log'. 
-// It allows users to search their Git history using natural language.
 
 use anyhow::Result;
 use colored::Colorize;
@@ -20,8 +18,6 @@ pub async fn run(
 ) -> Result<()> {
     debug!(query = %query, count, "Running log command");
 
-    // 1. Load the AI model. 
-    // This model is what understands the meaning of your search query.
     let model = match load_shared_model() {
         Ok(m) => m,
         Err(SgitError::ModelLoad(e)) => {
@@ -38,8 +34,6 @@ pub async fn run(
         after_date: after.clone(),
     };
 
-    // 2. Perform the semantic search.
-    // It compares your query against every commit in the database for the current repo.
     let repo_path = std::env::current_dir().expect("Cannot read current directory");
     let results = match search(&query, &model, &opts, &repo_path) {
         Ok(r) => r,
@@ -71,7 +65,6 @@ pub async fn run(
         return Ok(());
     }
 
-    // 3. Print the results in a format that looks like the regular 'git log'.
     println!(
         "\n{} {}\n",
         "Results for:".dimmed(),
@@ -80,7 +73,6 @@ pub async fn run(
 
     for result in &results {
         if show_scores {
-            // Show how confident the AI is about this result (0% to 100%).
             print!(
                 "  {} ",
                 format!("[{:.0}%]", result.score * 100.0).dimmed()
@@ -97,7 +89,6 @@ pub async fn run(
 
     println!();
 
-    // 4. If the user used filters (like author or date), remind them what's active.
     if author.is_some() || after.is_some() {
         let mut active = vec![];
         if let Some(ref a) = author {

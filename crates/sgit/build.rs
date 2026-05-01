@@ -10,8 +10,6 @@ fn main() {
         
         if Path::new(shim_path).exists() {
             println!("cargo:rerun-if-changed={}", shim_path);
-            
-            // Compile the shim
             let status = Command::new("gcc")
                 .args(&["-c", shim_path, "-o"])
                 .arg(format!("{}/glibc_shim.o", out_dir))
@@ -19,7 +17,6 @@ fn main() {
                 .expect("Failed to run gcc");
             
             if status.success() {
-                // Create static library
                 Command::new("ar")
                     .args(&["rcs", "libglibc_shim.a", "glibc_shim.o"])
                     .current_dir(&out_dir)

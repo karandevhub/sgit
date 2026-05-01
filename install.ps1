@@ -1,5 +1,4 @@
-# Install sgit on Windows via PowerShell
-# Run: iwr -useb https://raw.githubusercontent.com/karandevhub/sgit/main/install.ps1 | iex
+# Install sgit on Windows
 
 param([string]$Version = "latest")
 
@@ -16,7 +15,6 @@ Write-Host ""
 Write-Host "  sgit installer for Windows" -ForegroundColor White
 Write-Host ""
 
-# Resolve version
 if ($Version -eq "latest") {
     Write-Info "Resolving latest version..."
     $rel     = Invoke-RestMethod "$ApiUrl/latest"
@@ -24,7 +22,6 @@ if ($Version -eq "latest") {
 }
 Write-Info "Version: v$Version"
 
-# Platform detection (Windows = x86_64 only for now)
 $platform = "windows-x86_64"
 Write-Info "Platform: $platform"
 
@@ -35,34 +32,28 @@ $TmpDir   = Join-Path $env:TEMP "sgit-install-$(Get-Random)"
 New-Item -ItemType Directory -Path $TmpDir | Out-Null
 
 try {
-    # Download
     Write-Info "Downloading $ZipName..."
     Invoke-WebRequest "$BaseUrl/$ZipName" -OutFile "$TmpDir\$ZipName" -UseBasicParsing
     Invoke-WebRequest "$BaseUrl/$SumName" -OutFile "$TmpDir\$SumName" -UseBasicParsing
 
-    # Verify checksum
     Write-Info "Verifying checksum..."
     $Expected = (Get-Content "$TmpDir\$SumName" -Raw).Split(" ")[0].Trim()
     $Actual   = (Get-FileHash "$TmpDir\$ZipName" -Algorithm SHA256).Hash.ToLower()
     if ($Actual -ne $Expected) { Write-Fail "Checksum mismatch! Expected=$Expected Got=$Actual" }
     Write-Ok "Checksum verified"
 
-    # Extract
     Expand-Archive "$TmpDir\$ZipName" -DestinationPath $TmpDir -Force
 
-    # Install to %LOCALAPPDATA%\sgit\bin
     $InstallDir = "$env:LOCALAPPDATA\sgit\bin"
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
     Copy-Item "$TmpDir\$Binary.exe" "$InstallDir\$Binary.exe" -Force
 
-    # Add to PATH (user scope — no admin required)
     $CurrentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
     if ($CurrentPath -notlike "*$InstallDir*") {
         [Environment]::SetEnvironmentVariable("PATH", "$InstallDir;$CurrentPath", "User")
         Write-Info "Added $InstallDir to your PATH"
     }
     
-    # Make it available in the current session
     if ($env:PATH -notlike "*$InstallDir*") {
         $env:PATH = "$InstallDir;$env:PATH"
     }
@@ -75,7 +66,6 @@ try {
     Write-Host "    sgit log --help        # all options"             -ForegroundColor Cyan
     Write-Host ""
 
-    # Download tracking - only reached on fully successful install
     try {
         $null = Invoke-WebRequest -Uri "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fkarandevhub%2Fsgit%2Fdownload&count_bg=%230099CC&title_bg=%23555555&title=downloads&edge_flat=false" -UseBasicParsing -ErrorAction SilentlyContinue
     } catch {}

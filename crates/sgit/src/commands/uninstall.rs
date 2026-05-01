@@ -1,5 +1,3 @@
-// This module handles the 'sgit uninstall' command. 
-// It cleans up everything sgit ever created on your system.
 
 use anyhow::{Context, Result};
 use colored::Colorize;
@@ -7,7 +5,7 @@ use colored::Colorize;
 pub async fn run() -> Result<()> {
     println!("\n  {} Starting uninstallation...", "→".cyan());
 
-    // 1. Remove the data folder where the database and AI models are stored.
+    // Remove data directory.
     let proj_dirs = directories::ProjectDirs::from("ai", "sgit", "sgit")
         .context("Could not determine application directory")?;
     
@@ -23,12 +21,12 @@ pub async fn run() -> Result<()> {
         println!("  {} Data directory not found, skipping.", "→".cyan());
     }
 
-    // 2. Remove the Git hook if you happen to be in a repository that uses sgit.
+    // Remove Git hook.
     if let Ok(current_dir) = std::env::current_dir() {
         let hook_path = current_dir.join(".git").join("hooks").join("post-commit");
         if hook_path.exists() {
             if let Ok(content) = std::fs::read_to_string(&hook_path) {
-                // We only delete it if it's the one we installed.
+                // Only delete if it's our hook.
                 if content.contains("sgit index") {
                     print!("  {} Removing local post-commit hook... ", "→".cyan());
                     match std::fs::remove_file(&hook_path) {
@@ -40,7 +38,7 @@ pub async fn run() -> Result<()> {
         }
     }
 
-    // 3. Delete the sgit binary itself from your computer.
+    // Delete binary.
     print!("  {} Deleting sgit binary... ", "→".cyan());
     match self_replace::self_delete() {
         Ok(_) => println!("{}", "Done".green()),
@@ -54,7 +52,7 @@ pub async fn run() -> Result<()> {
                     "sgit".cyan()
                 );
             }
-            return Ok(()); // Stop here if binary deletion fails
+            return Ok(());
         }
     }
 
