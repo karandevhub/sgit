@@ -6,6 +6,10 @@
 
 > **Find commits with natural language instead of grep patterns.**
 
+<p align="center">
+  <video src="docs/assets/sgit-demo.mp4" width="100%" controls autoplay loop muted></video>
+</p>
+
 ```bash
 # Search by meaning, not just keywords
 sgit log "where did we fix the login timeout issue?"
