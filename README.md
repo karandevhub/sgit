@@ -6,9 +6,7 @@
 
 > **Find commits with natural language instead of grep patterns.**
 
-<p align="center">
-  <video src="docs/assets/sgit-demo.mp4" width="100%" controls autoplay loop muted></video>
-</p>
+https://github.com/user-attachments/assets/0177aeab-b2c1-47ae-b96f-a10ec0a5c3bf
 
 ```bash
 # Search by meaning, not just keywords
